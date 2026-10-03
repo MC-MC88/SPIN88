@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SPIN88</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #E8E9E3;
+      --text-color: #2A2E28;
+      --card-bg: #F4F5F0;
+      --accent-olive: #6B6F45;
+      --accent-mustard: #C4A251;
+      --accent-dark: #2A2E28;
+      --shadow: rgba(0, 0, 0, 0.1);
+      --wheel-stroke: #2A2E28;
+      --wheel-colors: #6B6F45, #C4A251, #8A8C6E, #D9C59A, #4A4D31, #A38C4C;
+      --modal-bg: rgba(244, 245, 240, 0.95);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #1E211D;
+      --text-color: #E8E9E3;
+      --card-bg: #2A2E28;
+      --accent-olive: #4A4D31;
+      --accent-mustard: #8A7239;
+      --accent-dark: #E8E9E3;
+      --shadow: rgba(0, 0, 0, 0.5);
+      --wheel-stroke: #1E211D;
+      --wheel-colors: #4A4D31, #8A7239, #3A3D2A, #6B5A2E, #2A2E28, #5C4D24;
+      --modal-bg: rgba(30, 33, 29, 0.95);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Montserrat', 'Amiri', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      transition: background-color 0.4s ease, color 0.4s ease;
+      overflow-x: hidden;
+      padding: 10px;
+    }
+
+    header {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 10px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--text-color);
+      text-transform: uppercase;
+    }
+
+    h1 span {
+      color: var(--accent-mustard);
+    }
+
+    #themeToggle {
+      background: var(--card-bg);
+      border: 2px solid var(--accent-olive);
+      color: var(--text-color);
+      font-size: 1.2rem;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 6px var(--shadow);
+      transition: transform 0.2s, background 0.3s;
+    }
+
+    #themeToggle:active {
+      transform: scale(0.9);
+    }
+
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .wheel-container {
+      position: relative;
+      width: 90vw;
+      max-width: 400px;
+      aspect-ratio: 1 / 1;
+      margin: 10px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .pointer {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-top: 30px solid var(--accent-mustard);
+      z-index: 10;
+      filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3));
+    }
+
+    #wheelCanvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow: 0 10px 25px var(--shadow), inset 0 0 20px rgba(0,0,0,0.1);
+      transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
+      transform: rotate(0deg);
+      background: var(--card-bg);
+    }
+
+    #spinBtn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: var(--accent-dark);
+      color: var(--bg-color);
+      border: 4px solid var(--accent-mustard);
+      font-weight: 800;
+      font-size: 1.1rem;
+      font-family: 'Montserrat', sans-serif;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 5;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    #spinBtn:active {
+      transform: translate(-50%, -50%) scale(0.9);
+    }
+
+    #spinBtn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      background-color: var(--accent-olive);
+    }
+
+    .controls {
+      width: 100%;
+      max-width: 400px;
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 16px var(--shadow);
+      border: 1px solid var(--accent-olive);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: background 0.4s ease;
+    }
+
+    .controls label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent-olive);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--accent-olive);
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: inherit;
+      font-size: 1rem;
+      resize: vertical;
+      outline: none;
+      direction: auto;
+      transition: border-color 0.3s;
+    }
+
+    textarea:focus {
+      border-color: var(--accent-mustard);
+      box-shadow: 0 0 0 2px rgba(196, 162, 81, 0.3);
+    }
+
+    #updateBtn {
+      padding: 12px;
+      background-color: var(--accent-olive);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    #updateBtn:active {
+      transform: scale(0.98);
+      background-color: var(--accent-mustard);
+    }
+
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 20px 10px;
+      font-size: 0.8rem;
+      color: var(--accent-olive);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: var(--modal-bg);
+      padding: 30px 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+      border: 2px solid var(--accent-mustard);
+      transform: scale(0.8);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      max-width: 90vw;
+    }
+
+    .modal.show .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-content h2 {
+      font-size: 1.2rem;
+      color: var(--accent-olive);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .modal-content p {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-color);
+      word-break: break-word;
+      direction: auto;
+    }
+
+    .modal-content button {
+      margin-top: 20px;
+      padding: 10px 25px;
+      background: var(--accent-mustard);
+      color: #1E211D;
+      border: none;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .modal-content button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>SPIN<span>88</span></h1>
+    <button id="themeToggle" aria-label="Toggle Theme">🌙</button>
+  </header>
+
+  <main>
+    <div class="wheel-container">
+      <div class="pointer"></div>
+      <canvas id="wheelCanvas"></canvas>
+      <button id="spinBtn">SPIN</button>
+    </div>
+
+    <div class="controls">
+      <label for="optionsInput">Edit Options (Line separated)</label>
+      <textarea id="optionsInput" placeholder="Pizza&#10;Burger&#10;Sushi&#10;Tacos&#10;Salad&#10;Pasta">Pizza
+Burger
+Sushi
+Tacos
+Salad
+Pasta</textarea>
+      <button id="updateBtn">Update Wheel</button>
+    </div>
+  </main>
+
+  <footer>
+    <div>mohamed005cheikh@gmail.com | by MC88</div>
+    <pre style="font-size: 0.6rem; margin-top: 10px; white-space: pre; overflow-x: auto; opacity: 0.7;">
+█   █  ███   ███   ███
+██ ██ █     █   █ █   █
+█ █ █ █      ███   ███
+█   █ █     █   █ █   █
+█   █  ███   ███   ███
+    </pre>
+  </footer>
+
+  <div class="modal" id="resultModal">
+    <div class="modal-content">
+      <h2>The Winner Is</h2>
+      <p id="winnerText">-</p>
+      <button id="closeModal">Awesome!</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    const spinBtn = document.getElementById('spinBtn');
+    const updateBtn = document.getElementById('updateBtn');
+    const optionsInput = document.getElementById('optionsInput');
+    const themeToggle = document.getElementById('themeToggle');
+    const resultModal = document.getElementById('resultModal');
+    const winnerText = document.getElementById('winnerText');
+    const closeModal = document.getElementById('closeModal');
+
+    let options = ['Pizza', 'Burger', 'Sushi', 'Tacos', 'Salad', 'Pasta'];
+    let currentRotation = 0;
+    let isSpinning = false;
+    const DPR = window.devicePixelRatio || 1;
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('spin88-theme') || 'light';
+      document.body.setAttribute('data-theme', savedTheme);
+      themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      const newTheme = isDark ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('spin88-theme', newTheme);
+      themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+      drawWheel();
+    });
+
+    function resizeCanvas() {
+      const container = canvas.parentElement;
+      const size = Math.min(container.clientWidth, 400);
+      
+      canvas.width = size * DPR;
+      canvas.height = size * DPR;
+      canvas.style.width = size + 'px';
+      canvas.style.height = size + 'px';
+      
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      drawWheel();
+    }
+
+    function getThemeColors() {
+      const styles = getComputedStyle(document.body);
+      const colorsStr = styles.getPropertyValue('--wheel-colors').trim();
+      return colorsStr.split(',').map(c => c.trim());
+    }
+
+    function drawWheel() {
+      const size = canvas.width / DPR;
+      const centerX = size / 2;
+      const centerY = size / 2;
+      const radius = size / 2 - 10;
+      
+      const colors = getThemeColors();
+      const strokeColor = getComputedStyle(document.body).getPropertyValue('--wheel-stroke').trim();
+      const textColor = getComputedStyle(document.body).getPropertyValue('--text-color').trim();
+      const numOptions = options.length;
+      const sliceAngle = (2 * Math.PI) / numOptions;
+
+      ctx.clearRect(0, 0, size, size);
+
+      for (let i = 0; i < numOptions; i++) {
+        const startAngle = i * sliceAngle;
+        const endAngle = startAngle + sliceAngle;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.closePath();
+
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fill();
+        
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = strokeColor;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(startAngle + sliceAngle / 2);
+        
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        const text = options[i];
+        const isRTL = /[\u0600-\u06FF]/.test(text);
+        
+        let fontSize = Math.min(18, 25 - numOptions);
+        if (isRTL) {
+          ctx.font = `bold ${fontSize}px 'Amiri', 'Montserrat', sans-serif`;
+        } else {
+          ctx.font = `600 ${fontSize}px 'Montserrat', 'Amiri', sans-serif`;
+        }
+        
+        ctx.fillStyle = textColor;
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 2;
+        
+        let displayText = text;
+        if (displayText.length > 15 && !isRTL) {
+          displayText = displayText.substring(0, 12) + '...';
+        } else if (displayText.length > 12 && isRTL) {
+          displayText = displayText.substring(0, 10) + '...';
+        }
+
+        ctx.fillText(displayText, radius * 0.65, 0);
+        ctx.restore();
+      }
+
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 45, 0, 2 * Math.PI);
+      ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--accent-dark').trim();
+      ctx.fill();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--accent-mustard').trim();
+      ctx.stroke();
+    }
+
+    function spinWheel() {
+      if (isSpinning || options.length === 0) return;
+      isSpinning = true;
+      spinBtn.disabled = true;
+
+      const spinAngle = Math.random() * 360 + 360 * 5;
+      currentRotation += spinAngle;
+
+      canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+      setTimeout(() => {
+        isSpinning = false;
+        spinBtn.disabled = false;
+
+        const actualRotation = currentRotation % 360;
+        const sliceAngle = 360 / options.length;
+        
+        const winningAngle = (360 - actualRotation) % 360;
+        const winningIndex = Math.floor(winningAngle / sliceAngle) % options.length;
+        
+        const winner = options[winningIndex];
+        showResult(winner);
+      }, 5000);
+    }
+
+    spinBtn.addEventListener('click', spinWheel);
+
+    function showResult(winner) {
+      winnerText.textContent = winner;
+      resultModal.classList.add('show');
+    }
+
+    closeModal.addEventListener('click', () => {
+      resultModal.classList.remove('show');
+    });
+
+    resultModal.addEventListener('click', (e) => {
+      if (e.target === resultModal) {
+        resultModal.classList.remove('show');
+      }
+    });
+
+    updateBtn.addEventListener('click', () => {
+      const rawText = optionsInput.value;
+      const newOptions = rawText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+      
+      if (newOptions.length < 2) {
+        alert('Please enter at least 2 options!');
+        return;
+      }
+      
+      options = newOptions;
+      drawWheel();
+    });
+
+    window.addEventListener('resize', resizeCanvas);
+    
+    initTheme();
+    setTimeout(() => {
+      resizeCanvas();
+    }, 100);
+  </script>
+</body>
+</html>
